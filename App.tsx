@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -15,6 +15,7 @@ import {
   Text,
   useColorScheme,
   View,
+  FlatList
 } from 'react-native';
 
 import {
@@ -25,9 +26,55 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+import ClampHeader from "./components/ClampHeader.tsx"
+import UserProfile from "./components/UserProfile.tsx"
+import IndexCard from "./components/IndexCard.tsx"
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
+
+const API_DATA = [
+    {
+        indexName: "WETH-WBTC",
+        _id: 1
+    },
+{
+        indexName: "WETH-USDC",
+        _id: 2
+    },
+{
+        indexName: "USDC-WBTC",
+        _id: 3
+    },
+{
+        indexName: "WETH-WMATIC",
+        _id: 4
+    },
+{
+        indexName: "USDC-WMATIC",
+        _id: 5
+    },
+{
+        indexName: "WETH-DAI",
+        _id: 6
+    },
+    {
+        indexName: "WBTC-WMATIC",
+        _id: 7
+    },
+    {
+        indexName: "DAI-WBTC",
+        _id: 8
+    },
+    {
+        indexName: "DAI-WBTC-WMATIC",
+        _id: 9
+    },
+    {
+        indexName: "DAI-USDC-WBTC",
+        _id: 10
+    }
+]
 
 function Section({children, title}: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -62,6 +109,26 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const [data, setData] = useState([])
+
+   const fetchData = async() => {
+    const res = await fetch("https://api.joinclamp.com/v1-1/indexes", {
+    method: "GET"
+    })
+    const json = await res.json()
+    console.log(json.data.all_indexes)
+    setData(json.data.all_indexes)
+//    json.data.all_indexes.forEach((element, index) => {
+//        console.log(element)
+//    })
+   }
+
+//   useEffect(() => {
+//    fetchData()
+//   }, [])
+//
+//   console.log(data)
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
@@ -71,26 +138,21 @@ function App(): React.JSX.Element {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
-        <Header />
+        <ClampHeader />
+        <UserProfile />
         <View
+        contentInsetAdjustmentBehavior="automatic"
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-            Also how are you doing?
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+          <Section title="Explore">
+            <Text>Buy any crypto index anytime anywhere</Text>
+            <View style={styles.flexing}>
+            {
+                  API_DATA && API_DATA.map((item)=> <IndexCard key={item._id} indexName={item.indexName} id={item._id}/>)
+            }
+            </View>
+         </Section>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -114,6 +176,11 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
+  flexing: {
+    display: "flex",
+    flexDirection: "column",
+    paddingHorizontal: 8
+  }
 });
 
 export default App;
